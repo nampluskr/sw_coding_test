@@ -78,16 +78,21 @@ static bool run()
 
 int main()
 {
+    clock_t start = clock();
     setbuf(stdout, NULL);
-    freopen("D:\problems\sw_pro_2024\240503_사진메타데이터관리\sample_input.txt", "r", stdin);
+    freopen("sample_input.txt", "r", stdin);
 
     int TC, MARK;
 
     scanf("%d %d", &TC, &MARK);
     for (int tc = 1; tc <= TC; ++tc)
     {
+        clock_t tc_start = clock();
         int score = run() ? MARK : 0;
-        printf("#%d %d\n", tc, score);
+        int tc_result = (clock() - tc_start) / (CLOCKS_PER_SEC / 1000);
+        printf("#%2d %d (%3d ms)\n", tc, score, tc_result);
     }
+    int result = (clock() - start) / (CLOCKS_PER_SEC / 1000);
+    printf(">> Result: %d ms\n", result);
     return 0;
 }
