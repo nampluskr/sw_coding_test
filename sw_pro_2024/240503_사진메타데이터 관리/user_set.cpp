@@ -1,77 +1,121 @@
-#include <cstring>
+#if 1
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <vector>
+#include <queue>
+#include <set>
+#include <cstring>
+#include <string>
+#include <unordered_map>
 using namespace std;
 
-#define MAX_PIC (10'000 + 100 * 1'000 + 1)
+#define MAX_PIC (10'000 + 100*1'000 + 1)
 
 struct Picture {
-	char ID[10];
-	char TIME[30];
-	char LOC[11];
-	char PEOPLE[55];
-	int id;
+	int ID;
 	int date;
 	int time;
+	char loc[11];
+	char people[55];
 	vector<const char*> peopleList;
-
-	void update_id() {
-		id = atoi(ID);
-	}
-	void update_time() {
-		char *start, *end;
-		char year[5], month[3], day[3], hour[3], min[3], sec[3];
-		strncpy_s(year, TIME, 4);
-
-		start = strchr(TIME, '/');
-		end = strchr(start + 1, '/');
-		strncpy(month, start + 1, end - start - 1);
-
-		start = strchr(end, '/');
-		end = strchr(start + 1, ',');
-		strncpy(day, start + 1, end - start - 1);
-
-		start = end;
-		end = strchr(start + 1, ':');
-		strncpy(hour, start + 1, end - start - 1);
-
-		start = end;
-		end = strchr(start + 1, ':');
-		strncpy(min, start + 1, end - start - 1);
-
-		start = end;
-		strncpy(sec, start + 1, strlen(start));
-
-		date = atoi(year) * 10'000 + atoi(month) * 100 + atoi(day);
-		time = atoi(hour) * 10'000 + atoi(min) * 100 + atoi(sec);
-	}
-	void update_people() {
-		char* ptr = strtok(PEOPLE, ",");
-		while (ptr != NULL) {
-			peopleList.push_back(ptr);
-			ptr = strtok(NULL, ",");
-		}
-	}
 };
 
 Picture pictures[MAX_PIC];
 int cnt;
 
-char* copy_metaData(char* metaData, const char* field, char* dest) {
+char ID[10], DATETIME[21], LOC[11], PEOPLE[55];
+
+void get_metaData(char* mPicture) {
 	char* start, * end;
 
-	start = strstr(metaData, field);
-	start = strchr(start, '[');
-	end = strchr(start, ']');
-	strncpy(dest, start + 1, end - start - 1);
-	return end + 1;
+	// ID 임시 저장
+	start = strchr(mPicture, '[');
+	end = strchr(start + 1, ']');
+	strncpy_s(ID, start + 1, end - start - 1);
+
+	// TIME 임시 저장
+	start = strchr(end + 1, '[');
+	end = strchr(start + 1, ']');
+	strncpy_s(DATETIME, start + 1, end - start - 1);
+
+	// LOC 임시 저장
+	start = strchr(end + 1, '[');
+	end = strchr(start + 1, ']');
+	strncpy_s(LOC, start + 1, end - start - 1);
+
+	// PEOPLE 임시 저장
+	start = strchr(end + 1, '[');
+	end = strchr(start + 1, ']');
+	strncpy_s(PEOPLE, start + 1, end - start - 1);
 }
 
-// ==================================================================	
+void set_metaData(Picture& pic) {
+	char* start, * end;
+
+	// str DATE -> int
+	char year[5], month[3], day[3], hour[3], min[3], sec[3];
+	strncpy_s(year, DATETIME, 4);
+
+	start = strchr(DATETIME, '/');
+	end = strchr(start + 1, '/');
+	strncpy_s(month, start + 1, end - start - 1);
+
+	start = strchr(end, '/');
+	end = strchr(start + 1, ',');
+	strncpy_s(day, start + 1, end - start - 1);
+
+	// str TIME -> int
+	start = end;
+	end = strchr(start + 1, ':');
+	strncpy_s(hour, start + 1, end - start - 1);
+
+	start = end;
+	end = strchr(start + 1, ':');
+	strncpy_s(min, start + 1, end - start - 1);
+
+	start = end;
+	strncpy_s(sec, start + 1, strlen(start));
+
+	pic.ID = atoi(ID);
+	pic.date = atoi(year) * 10'000 + atoi(month) * 100 + atoi(day);
+	pic.time = atoi(hour) * 10'000 + atoi(min) * 100 + atoi(sec);
+	strcpy_s(pic.loc, LOC);
+	strcpy_s(pic.people, PEOPLE);
+
+	char* ptr = strtok(pic.people, ",");
+	while (ptr != NULL) {
+		pic.peopleList.push_back(ptr);
+		ptr = strtok(NULL, ",");
+	}
+}
+
+struct Data {
+	int date, time, picIdx;
+
+	bool operator<(const Data& data) const {
+		return (date > data.date) || (date == data.date && time > data.time);
+	}
+};
+
+unordered_map<int, int> picMap;
+unordered_map<string, set<Data>> locMap;
+unordered_map<string, set<Data>> peopleMap;
+priority_queue<Data> oldestPQ;
+
+
+// ==================================================================
 void savePictures(int M, char mPictureList[][200]);
 
 void init(int N, char mPictureList[][200])
 {
 	cnt = 0;
+	picMap.clear();
+    locMap.clear();
+	peopleMap.clear();
+	while (!oldestPQ.empty()) oldestPQ.pop();
+
 	for (int i = 0; i < MAX_PIC; i++)
 		pictures[i] = {};
 
@@ -81,28 +125,55 @@ void init(int N, char mPictureList[][200])
 void savePictures(int M, char mPictureList[][200])
 {
 	for (int i = 0; i < M; i++) {
-		char* start;
-		Picture& pic = pictures[cnt + i];
+		get_metaData(mPictureList[i]);
+		Picture& pic = pictures[cnt];
+		set_metaData(pic);
 
-		start = copy_metaData(mPictureList[i], "ID", pic.ID);
-		start = copy_metaData(start, "TIME", pic.TIME);
-		start = copy_metaData(start, "LOC", pic.LOC);
-		start = copy_metaData(start, "PEOPLE", pic.PEOPLE);
-		pic.update_id();
-		pic.update_time();
-		pic.update_people();
+		picMap[pic.ID] = cnt;
+		locMap[pic.loc].insert({ pic.date, pic.time, cnt });
+		for (const auto& p : pic.peopleList)
+			peopleMap[p].insert({ pic.date, pic.time, cnt });
+		oldestPQ.push({ pic.date, pic.time, cnt });
+		cnt++;
 	}
-	cnt += M;
 }
 
 int filterPictures(char mFilter[], int K)
 {
+	char* start = strchr(mFilter, '[');
+	char* end = strchr(start, ']');
+	char strFilter[11];
+	strncpy_s(strFilter, start + 1, end - start - 1);
+    auto& set = (mFilter[0]  == 'L')? locMap[strFilter]: peopleMap[strFilter];
+	int picIdx;
 
-	return -1;
+    if (1) { // 앞/뒤 가까운데서 순회 (좀 더 빨라짐)
+        if (K < set.size() / 2) {
+            auto fwd = set.begin();
+            advance(fwd, K - 1);
+            picIdx = (*fwd).picIdx;
+        }  else {
+            auto bwd = set.rbegin();
+            advance(bwd, set.size() - K);
+            picIdx = (*bwd).picIdx;
+        }
+    } else { // 앞에서 순회
+        auto fwd = set.begin();
+        advance(fwd, K - 1);
+        picIdx = (*fwd).picIdx;
+    }
+	return pictures[picIdx].ID;
 }
 
 int deleteOldest(void)
 {
+	int picIdx = oldestPQ.top().picIdx; oldestPQ.pop();
+	Picture& pic = pictures[picIdx];
 
-	return -1;
+	locMap[pic.loc].erase({ pic.date, pic.time, picIdx });
+	for (const auto& people : pic.peopleList)
+		peopleMap[people].erase({ pic.date, pic.time, picIdx });
+
+	return pictures[picIdx].ID;
 }
+#endif
