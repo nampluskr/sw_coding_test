@@ -39,16 +39,15 @@ struct Data {
 void init(int K, int L)
 {
     for (int i = 0; i < sampleCnt; i++) samples[i].state = 0;
-
-    sampleCnt = 0;
-    sampleMap.clear();
-    ::K = K;
-    ::L = L;
-    bucketCnt = ceil((double)MAX_XY / L);
-
     for (int i = 0; i <= bucketCnt; i++)
         for (int j = 0; j <= bucketCnt; j++)
             buckets[i][j].clear();
+
+    ::K = K;
+    ::L = L;
+    sampleCnt = 0;
+    sampleMap.clear();
+    bucketCnt = ceil((double)MAX_XY / L);
 }
 
 void addSample(int mID, int mX, int mY, int mC)
