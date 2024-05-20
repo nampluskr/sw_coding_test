@@ -1,44 +1,35 @@
+#if 1
 #include <vector>
 using namespace std;
 
 #define MAX_PLAYERS 100'001       // [4, 100,000]
-#define MAX_TEAMS   100'001       // [4, 100,000]
 
 struct Player {
     int score;
     int teamIdx;
 } players[MAX_PLAYERS];
-int playerCnt;
 
 struct Team {
     int score;
     vector<int> playerList;
-} teams[MAX_TEAMS];
+} teams[MAX_PLAYERS];
 
 
 /////////////////////////////////////////////////////////////////////
 void init(int N)
 {
-    // init
-    for (int i = 1; i <= playerCnt; i++)
-        teams[i].playerList.clear();
-
-    playerCnt = N;
-    for (int i = 1; i <= playerCnt; i++) {
+    for (int i = 1; i <= N; i++) {
         players[i].score = 0;
         players[i].teamIdx = i;
         teams[i].score = 0;
-        teams[i].playerList.push_back(i);
+        teams[i].playerList = { i };
     }
 }
 
 void updateScore(int mWinnerID, int mLoserID, int mScore)
 {
-    auto& winnerTeam = teams[players[mWinnerID].teamIdx];
-    auto& loserTeam = teams[players[mLoserID].teamIdx];
-
-    winnerTeam.score += mScore;
-    loserTeam.score -= mScore;
+    teams[players[mWinnerID].teamIdx].score += mScore;
+    teams[players[mLoserID].teamIdx].score -= mScore;
 }
 
 void unionTeam(int mPlayerA, int mPlayerB)
@@ -61,3 +52,4 @@ int getScore(int mID)
 {
     return players[mID].score + teams[players[mID].teamIdx].score;
 }
+#endif
