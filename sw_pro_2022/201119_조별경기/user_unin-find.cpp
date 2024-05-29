@@ -1,4 +1,4 @@
-#if 0
+#if 1
 inline void swap(int& a, int& b) { int temp = a; a = b; b = temp; }
 
 constexpr int MAX_N = 100'001;
