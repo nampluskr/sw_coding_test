@@ -390,121 +390,120 @@ int findPath(int mStart, int mEnd, int mM, int stops[])
 
 ```cpp
 #if 1
-#define MAP_SIZE_MAX    350
-
 #include<vector>
 #include<queue>
 #include<algorithm>
-#include<cstring>
 using namespace std;
-using pii = pair<int, int>;
 
-#define MAX_N   350
+#define MAX_N       350
+#define MAX_NODES   205
 
 // graph
 int N;                      // 맵 크기
-int M;                      // 게이트 최대 번호
+int nodeCnt;                // 게이트 최대 번호
 int maxStamina;             // 최대 체력
-int(*map)[MAX_N];    // 맵(0:길, 1:기둥, 2~:gateID+1)
-vector<pii> adjList[205];   // 인접배열
-pii coord[205];             // {row, col}
+int(*map)[MAX_N];           // 맵(0:길, 1:기둥, 2~:gateID+1)
+
+struct Edge { 
+    int ID, dist;  // { dist, ID }
+    bool operator<(const Edge& edge) const { return dist > edge.dist; }
+    bool operator==(const Edge& edge) const { return dist == edge.dist && ID == edge.ID; }
+};
+vector<Edge> adjList[MAX_NODES];   // 인접배열 
 
 // bfs
-struct Point { int r, c, d; };
-bool visited[350][350];
+struct Point { int row, col, dist; };
+bool visited[MAX_N][MAX_N];
 int dr[] = { -1, 0, 1, 0 };
 int dc[] = { 0, 1, 0, -1 };
 
 // dijkstra
-int dist[205];
+int dist[MAX_NODES];
+
+Point pointMap[MAX_NODES];          // { row, col }
+int get_gateID[MAX_N][MAX_N];       // { row, col } -> gateID
 
 //////////////////////////////////////////////////////////////////////
 void init(int N, int mMaxStamina, int mMap[MAX_N][MAX_N])
 {
     ::N = N;
-    M = 0;
+    nodeCnt = 0;
     map = mMap;
     maxStamina = mMaxStamina;
-    for (auto& v : adjList) v.clear();
+    for (int i = 0; i < MAX_NODES; i++) adjList[i].clear();
 }
 
-void addGate(int gid, int mRow, int mCol)
+void addGate(int mGateID, int mRow, int mCol)
 {
-    M++;
-    map[mRow][mCol] = gid + 1;
-    coord[gid] = { mRow, mCol };
+    nodeCnt++;
+    map[mRow][mCol] = mGateID + 1;
+    pointMap[mGateID] = { mRow, mCol };
 
     queue<Point> que;
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
-            visited[i][j] = -1;
+            visited[i][j] = 0;
 
     que.push({ mRow, mCol, 0 });
-    visited[mRow][mCol] = 0;
+    visited[mRow][mCol] = 1;
 
     while (!que.empty()) {
         auto cur = que.front(); que.pop();
 
-        if (cur.d == maxStamina) break;
+        if (cur.dist == maxStamina) break;
 
         for (int i = 0; i < 4; i++) {
-            Point next = { cur.r + dr[i], cur.c + dc[i], cur.d + 1 };
+            Point next = { cur.row + dr[i], cur.col + dc[i], cur.dist + 1 };
 
-            if (next.r < 0 || next.r >= N) continue;
-            if (next.c < 0 || next.c >= N) continue;
-            if (visited[next.r][next.c] != -1) continue;
-            if (map[next.r][next.c] == 1) continue;
+            if (next.row < 0 || next.row >= N) continue;
+            if (next.col < 0 || next.col >= N) continue;
+            if (visited[next.row][next.col] != 0) continue;
+            if (map[next.row][next.col] == 1) continue;
 
-            que.push({ next.r, next.c, next.d });
-            visited[next.r][next.c] = 0;
+            que.push({ next.row, next.col, next.dist });
+            visited[next.row][next.col] = visited[cur.row][cur.col] + 1;
 
-            if (map[next.r][next.c] > 1) {
-                int gid2 = map[next.r][next.c] - 1;
-                adjList[gid].push_back({ next.d, gid2 });
-                adjList[gid2].push_back({ next.d, gid });
+            if (map[next.row][next.col] > 1) {
+                int next_ID = map[next.row][next.col] - 1;
+                adjList[mGateID].push_back({ next_ID, next.dist });
+                adjList[next_ID].push_back({ mGateID, next.dist });
             }
         }
     }
 }
 
-void removeGate(int gid)
+void removeGate(int mGateID)
 {
-    for (pii p : adjList[gid]) {
-        int cost = p.first;
-        int x = p.second;
-        adjList[x].erase(find(adjList[x].begin(), adjList[x].end(), pii{ cost, gid }));
+    for (const auto& p : adjList[mGateID]) {
+        auto& adj = adjList[p.ID];
+        adj.erase(find(adj.begin(), adj.end(), Edge{ mGateID, p.dist }));
     }
-    adjList[gid].clear();
-    map[coord[gid].first][coord[gid].second] = 0;
+    adjList[mGateID].clear();
+    map[pointMap[mGateID].row][pointMap[mGateID].col] = 0;
 }
 
 // dijkstra
-int getMinTime(int s, int e)
+int getMinTime(int mStartGateID, int mEndGateID)
 {
-    priority_queue<pii> pq;    // {-dist, gid}
-    fill(dist, dist + M + 1, 1e9);
+    priority_queue<Edge> pq;
+    for (int i = 0; i <= nodeCnt; i++) dist[i] = 1e9;
 
-    pq.push({ 0, s });
-    dist[s] = 0;
+    dist[mStartGateID] = 0;
+    pq.push({ mStartGateID, 0 });
 
     while (!pq.empty()) {
-        int cur = pq.top().second;
-        int minDist = -pq.top().first;
-        pq.pop();
+        auto cur = pq.top(); pq.pop();
 
-        if (dist[cur] < minDist) continue;
-        if (cur == e) return minDist;
+        if (cur.ID == mEndGateID) return cur.dist;
 
-        for (pii p : adjList[cur]) {
-            int cost = p.first;
-            int next = p.second;
-            if (dist[next] > minDist + cost) {
-                dist[next] = minDist + cost;
-                pq.push({ -dist[next], next });
+        if (dist[cur.ID] < cur.dist) continue;
+        for (const auto& next : adjList[cur.ID]) {
+            if (dist[next.ID] > cur.dist + next.dist) {
+                dist[next.ID] = cur.dist + next.dist;
+                pq.push({ next.ID, dist[next.ID] });
             }
         }
     }
-
     return -1;
 }
 #endif
