@@ -1,99 +1,99 @@
-// WS 559 ms
-#include <unordered_map>
+#if 1
 #include <vector>
-//#include <set>
-#include <algorithm>
+#include <unordered_map>
+#include <queue>
 using namespace std;
 
-#define MAX_SAMPLES     20'001  // addSamples()
-#define MAX_CATEGORIES  11      // mC: 자료의 범주 [1, 10]
-#define MAX_XY          4'001   // mX, mY: [1, 4,000]
-#define MAX_BUCKETS     1'002   // ceil(4001 / 4) + 1
-#define DELETED         1
+#define MAX_SAMPLES 20000	// addSample() 함수의 호출 횟수 20,000 이하
+#define MAX_N		4000	// 자료의 x축, y축 위치 (1 ≤ mX, mY ≤ 4,000)
+#define MAX_TYPE	10		// 자료의 범주 (1 ≤ mC ≤ 10)
+#define MAX_BUCKETS	200		// 파티션 전체 개수
 
-int K;      // 최근접 이웃의 개수 [3, 11]
-int L;      // 이상치를 판별하기 위한 길이 [4, 100]
+#define ADDED		0
+#define REMOVED		1
+
+int N = MAX_N;				// max x축, y축
+int S = sqrt(MAX_N + 1);	// bucket size => max bucket index = N / S
 
 struct Sample {
-    int mX, mY, mC;
-    int state;
+	int mX, mY, mC, state;
 } samples[MAX_SAMPLES];
 int sampleCnt;
 unordered_map<int, int> sampleMap;
-
-vector<int> buckets[MAX_BUCKETS][MAX_BUCKETS];
-int bucketCnt;      // ceil(MAX_XY / L)
+vector<int> sampleList[MAX_BUCKETS][MAX_BUCKETS];
 
 struct Data {
-    int dist, mX, mY, mC;
-
-    bool operator<(const Data& data) const {
-        if (dist != data.dist) return dist < data.dist;
-        if (mX != data.mX) return mX < data.mX;
-        return mY < data.mY;
-    }
+	int dist, mX, mY, sIdx;
+	bool operator<(const Data & data) const {
+		if (dist != data.dist) return dist > data.dist;
+		if (mX != data.mX) return mX > data.mX;
+		return mY > data.mY;
+	}
 };
 
+int K;		// 근접 이웃 개수
+int L;		// 아웃라이어 범위
 
-/////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 void init(int K, int L)
 {
-    for (int i = 0; i < sampleCnt; i++) samples[i].state = 0;
-    for (int i = 0; i <= bucketCnt; i++)
-        for (int j = 0; j <= bucketCnt; j++)
-            buckets[i][j].clear();
+	::K = K;
+	::L = L;
+	//for (int i = 0; i < sampleCnt; i++) { samples[i] = {}; }
+	sampleCnt = 0;
+	sampleMap.clear();
 
-    ::K = K;
-    ::L = L;
-    sampleCnt = 0;
-    sampleMap.clear();
-    bucketCnt = ceil((double)MAX_XY / L);
+	for (int i = 0; i <= N / S; i++)
+		for (int j = 0; j <= N / S; j++)
+			sampleList[i][j] = {};
 }
 
 void addSample(int mID, int mX, int mY, int mC)
 {
-    int sIdx = sampleMap[mID] = sampleCnt++;
-    samples[sIdx].mX = mX;
-    samples[sIdx].mY = mY;
-    samples[sIdx].mC = mC;
-    buckets[mX / L][mY / L].push_back(sIdx);
+	int sIdx = sampleCnt++;
+	sampleMap.emplace(mID, sIdx);
+	samples[sIdx] = { mX, mY, mC, ADDED };
+	sampleList[mX / S][mY / S].push_back(sIdx);
 }
 
 void deleteSample(int mID)
 {
-    int sIdx = sampleMap[mID];
-    samples[sIdx].state = DELETED;
+	int sIdx = sampleMap[mID];
+	samples[sIdx].state = REMOVED;
 }
 
 int predict(int mX, int mY)
 {
-    // 탐색 그룹 범위 설정
-    int sX = max(0, (mX - L) / L);
-    int sY = max(0, (mY - L) / L);
-    int eX = min(bucketCnt - 1, (mX + L) / L);
-    int eY = min(bucketCnt - 1, (mY + L) / L);
+	int sX = max((mX - L) / S, 0);
+	int sY = max((mY - L) / S, 0);
+	int eX = min((mX + L) / S, N / S);
+	int eY = min((mY + L) / S, N / S);
 
-    // 거리 L 이하인 자료 후보 선정
-    vector<Data> selected;
-    for (int i = sX; i <= eX; i++)
-        for (int j = sY; j <= eY; j++)
-            for (int sIdx : buckets[i][j]) {
-                auto& sample = samples[sIdx];
-                int dist = abs(sample.mX - mX) + abs(sample.mY - mY);
-                if (sample.state == DELETED) continue;
-                if (dist > L) continue;
-                selected.push_back({ dist, sample.mX, sample.mY, sample.mC });
-            }
+	priority_queue<Data> Q;
+	for (int i = sX; i <= eX; i++)
+		for (int j = sY; j <= eY; j++)
+			for (int sIdx : sampleList[i][j]) {
+				auto& sample = samples[sIdx];
+				int dist = abs(sample.mX - mX) + abs(sample.mY - mY);
+				if (sample.state == REMOVED) continue;
+				if (dist > L) continue;
+				Q.push({ dist, sample.mX, sample.mY, sIdx });
+			}
+	if (Q.size() < K) return -1;
 
-    // 후보가 K개가 안되면 이상치
-    if (selected.size() < K) return -1;
+	// KNN 선택
+	int cnt = K;
+	int selected[MAX_TYPE + 1] = {};
+	while (!Q.empty() && cnt--) {
+		auto data = Q.top(); Q.pop();
+		selected[samples[data.sIdx].mC]++;
+	}
 
-    // K-최근접 이웃 선정
-    sort(selected.begin(), selected.end());
-
-    // 범주 추정
-    int categories[MAX_CATEGORIES] = {};
-    for (int i = 0; i < K; i++)
-        categories[selected[i].mC]++;
-    return max_element(categories + 1, categories + K) - categories;
+	// 범주 판정
+	int res = 1;
+	for (int mC = 2; mC <= MAX_TYPE; mC++)
+		if (selected[mC] > selected[res]) res = mC;
+		else if (selected[mC] == selected[res] && mC < res) res = mC;
+	return res;
 }
+#endif

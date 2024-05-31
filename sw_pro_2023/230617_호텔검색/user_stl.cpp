@@ -53,6 +53,7 @@ int merge(int mHotelA, int mHotelB) {
     return brands[brandA].hotelList.size();
 }
 
+// dijsktra
 int move(int mStart, int mBrandA, int mBrandB) {
     int res = 0;
     for (int i = 0; i < N; i++) dist[i] = 1e6;
@@ -65,11 +66,11 @@ int move(int mStart, int mBrandA, int mBrandB) {
         auto cur = pq.top(); pq.pop();
 
         if (cur.hotel != mStart && hotels[cur.hotel].brand == mBrandA) {
-            mBrandA = -1; 
+            mBrandA = -1;
             res += cur.dist;
         }
         else if (cur.hotel != mStart && hotels[cur.hotel].brand == mBrandB) {
-            mBrandB = -1; 
+            mBrandB = -1;
             res += cur.dist;
         }
         if (mBrandA == -1 && mBrandB == -1) break;
