@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <cstring>
-#include <algorithm>
+#include <algorithm>    // sort()
 using namespace std;
 
 #define MAX_PICTURES (10'000 + 100 * 1'000 + 1)
