@@ -15,11 +15,11 @@ struct Brand {
 } brands[MAX_N];
 
 struct Edge {
-    int hotel, dist;
+    int to, dist;
     bool operator<(const Edge& edge) const { return dist > edge.dist; }
 };
 vector<Edge> adj[MAX_N];
-int dist[MAX_N];
+int distDP[MAX_N];
 priority_queue<Edge> pq;
 
 
@@ -46,40 +46,40 @@ int merge(int mHotelA, int mHotelB) {
     int brandB = hotels[mHotelB].brand;
 
     if (brandA != brandB)
-        for (int hotel : brands[brandB].hotelList) {
-            hotels[hotel].brand = brandA;
-            brands[brandA].hotelList.push_back(hotel);
+        for (int to : brands[brandB].hotelList) {
+            hotels[to].brand = brandA;
+            brands[brandA].hotelList.push_back(to);
         }
     return brands[brandA].hotelList.size();
 }
 
 // dijsktra
 int move(int mStart, int mBrandA, int mBrandB) {
-    int res = 0;
-    for (int i = 0; i < N; i++) dist[i] = 1e6;
+    for (int i = 0; i < N; i++) distDP[i] = 1e6;
     pq = {};
 
-    dist[mStart] = 0;
-    pq.push({ mStart, dist[mStart]});
+    distDP[mStart] = 0;
+    pq.push({ mStart, distDP[mStart]});
 
+    int res = 0;
     while (!pq.empty()) {
         auto cur = pq.top(); pq.pop();
 
-        if (cur.hotel != mStart && hotels[cur.hotel].brand == mBrandA) {
+        if (cur.to != mStart && hotels[cur.to].brand == mBrandA) {
             mBrandA = -1;
             res += cur.dist;
         }
-        else if (cur.hotel != mStart && hotels[cur.hotel].brand == mBrandB) {
+        else if (cur.to != mStart && hotels[cur.to].brand == mBrandB) {
             mBrandB = -1;
             res += cur.dist;
         }
         if (mBrandA == -1 && mBrandB == -1) break;
 
-        if (dist[cur.hotel] < cur.dist) continue;
-        for (const auto& next : adj[cur.hotel]) {
-            if (dist[next.hotel] > dist[cur.hotel] + next.dist) {
-                dist[next.hotel] = dist[cur.hotel] + next.dist;
-                pq.push({ next.hotel, dist[next.hotel] });
+        if (distDP[cur.to] < cur.dist) continue;
+        for (const auto& next : adj[cur.to]) {
+            if (distDP[next.to] > distDP[cur.to] + next.dist) {
+                distDP[next.to] = distDP[cur.to] + next.dist;
+                pq.push({ next.to, distDP[next.to] });
             }
         }
     }

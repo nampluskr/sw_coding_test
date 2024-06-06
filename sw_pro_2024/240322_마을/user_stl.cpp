@@ -23,7 +23,6 @@ struct Village {
     int num_houses;
     vector<int> houseList;
 } villages[MAX_HOUSES];
-
 int villageCnt;
 
 // 좌표 그룹 정보
