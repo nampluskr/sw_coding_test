@@ -1,3 +1,4 @@
+#if 1
 #include <vector>
 #include <queue>
 #include <unordered_map>
@@ -9,7 +10,7 @@ using namespace std;
 int cityCnt;
 unordered_map<int, int> cityMap;
 
-struct Edge { 
+struct Edge {
     int to, cost;
     bool operator<(const Edge& edge) const { return cost > edge.cost; }
 };
@@ -56,7 +57,7 @@ int dijkstra1(int sIdx, int eIdx) {
 int dijkstra2(int sIdx) {
     int res = 0;
 
-    // cities to hub
+    // cities to hub -> use adjList1
     pq = {};
     for (int i = 0; i < cityCnt; i++) costDP[i] = INF;
     costDP[sIdx] = 0;
@@ -74,7 +75,7 @@ int dijkstra2(int sIdx) {
     }
     for (int i = 0; i < cityCnt; i++) res += costDP[i];
 
-    // hub to cities
+    // hub to cities -> use adjList2
     pq = {};
     for (int i = 0; i < cityCnt; i++) costDP[i] = INF;
     costDP[sIdx] = 0;
@@ -126,7 +127,7 @@ int cost(int mHub)
 
     // 시간초과 (8180 ms)
     // for (int cIdx = 0; cIdx < cityCnt; cIdx++) {
-    //     if (cIdx == hIdx) continue;
+    //     // if (cIdx == hIdx) continue;
     //     res += dijkstra1(cIdx, hIdx) + dijkstra1(hIdx, cIdx);
     // }
 
@@ -134,3 +135,4 @@ int cost(int mHub)
     res = dijkstra2(hIdx);
     return res;
 }
+#endif
