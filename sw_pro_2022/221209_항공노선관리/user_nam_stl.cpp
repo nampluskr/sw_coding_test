@@ -60,13 +60,15 @@ int minTravelTime(int mStartAirport, int mEndAirport, int mStartTime)
 
         if (timeDP[cur.to] < cur.time) continue;
         for (const auto& next: timeList[cur.to]) {
-            cur.time %= 24;
+            int cur_start_time = cur.time % 24;
             int wait_time;
-            if (cur.time > next.start_time) wait_time = 24 - (cur.time - next.start_time);
-            else wait_time = next.start_time - cur.time;
+            if (cur_start_time > next.start_time)
+                wait_time = 24 - (cur_start_time - next.start_time);
+            else 
+                wait_time = next.start_time - cur_start_time;
 
-            if (timeDP[next.to] > timeDP[cur.to] + next.travel_time + wait_time) {
-                timeDP[next.to] = timeDP[cur.to] + next.travel_time + wait_time;
+            if (timeDP[next.to] > cur.time + next.travel_time + wait_time) {
+                timeDP[next.to] = cur.time + next.travel_time + wait_time;
                 pq.push({ next.to, timeDP[next.to] });
             }
         }
