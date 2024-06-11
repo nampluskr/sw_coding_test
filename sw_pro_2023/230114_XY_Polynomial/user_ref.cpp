@@ -1,3 +1,4 @@
+#if 0
 #include<unordered_map>
 #include<string>
 using namespace std;
@@ -87,3 +88,4 @@ int calcPolynomial(char mName[], int mX, int mY)
     }
     return res;
 }
+#endif
