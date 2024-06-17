@@ -83,6 +83,6 @@ int main()
     }
     int result = (clock() - start) / (CLOCKS_PER_SEC / 1000);
     printf(">> Result: %d ms\n", result);
-    return 0;
 
+    return 0;
 }
