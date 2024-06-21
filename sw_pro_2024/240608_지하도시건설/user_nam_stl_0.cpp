@@ -1,3 +1,4 @@
+#if 0
 #include <queue>
 using namespace std;
 
@@ -9,29 +10,23 @@ int mH;                     // 웅덩이의 세로 방향의 길이 (8 ≤ mH �
 int mW;                     // 웅덩이의 가로 방향의 길이 (10 ≤ mW ≤ 200,000) 0 ~ mW - 1
 
 struct Box {
-    int start, end, mExitA, mExitB;
+    int left, right, mExitA, mExitB, row;
 } boxes[MAX_BOXES];
 
-struct RangeMin {
-    struct Group { int base, min, idx; };
+struct RangeMinQuery {
+    // struct Group { int base, min, idx; };
     int arr[MAX_W];             // min value
-    Group groups[MAX_W / 10];   // group min, idx
-    int sq;                     // group size
+    // Group groups[MAX_W / 10];   // group min, idx
+    // int sq;                     // group size
 
     void clear() {
-        sq = sqrt(mW);
+        // sq = sqrt(mW);
         for (int i = 0; i < mW; i++) arr[i] = mH;
-        for (int i = 0; i < mW / sq; i++) groups[i] = { mH, -1 };
-    }
-    void updatePoint(int idx, int value) {
-        // arr[idx] += value;
-
-        // int gIdx = idx / sq;
-        // int left = gIdx * sq, right = min((gIdx + 1) * sq - 1, mW - 1);
-
-        
+        // for (int i = 0; i < mW / sq; i++) groups[i] = { mH, -1 };
     }
     void updateRange(int left, int right, int value) {
+        for (int i = left; i <= right; i++) arr[i] = value;
+
         // int s = left / sq, e = right / sq;
 
         // if (s == e) {
@@ -42,11 +37,11 @@ struct RangeMin {
         // for (int i = s + 1; i <= e - 1; i++) groups[i] = value;
         // for (int i = e * sq; i <= right; i++) updatePoint(i, value);
     }
-    int queryPoint(int idx) { 
-        return 0;
-        // return arr[idx] + groups[idx / sq];
-    }
     int queryRange(int left, int right) {
+        int res = mW;
+        for (int i = left; i <= right; i++) res = min(res, arr[i]);
+        return res;
+
         // int res = mW;
         // int s = left / sq, e = right / sq;
 
@@ -58,7 +53,6 @@ struct RangeMin {
         // for (int i = s + 1; i <= e - 1; i++) res = min(res, groups[i]);
         // for (int i = e * sq; i <= right; i++) res = min(res, queryPoint(i));
         // return res;
-        return 0;
     }
 } rmq;
 
@@ -73,9 +67,11 @@ int dropBox(int mId, int mLen, int mExitA, int mExitB, int mCol)
 {
     int left = mCol, right = mCol + mLen - 1;
     boxes[mId] = { left, right, mExitA, mExitB };
-    rmq.updateRange(left, right, 1);
+    int row = rmq.queryRange(left, right) - 1;
+    boxes[mId].row = row;
 
-    return 0;
+    rmq.updateRange(left, right, row);
+    return row;
 }
 
 // dijkstra
@@ -84,3 +80,4 @@ int explore(int mIdA, int mIdB)
 
     return -1;
 }
+#endif

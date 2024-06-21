@@ -35,6 +35,11 @@ static bool run()
         {
             int mId, mLen, mExitA, mExitB, mCol;
             scanf("%d %d %d %d %d", &mId, &mLen, &mExitA, &mExitB, &mCol);
+
+            if (mId == 1) {
+                int k = 1;
+            }
+
             int ret = dropBox(mId, mLen, mExitA, mExitB, mCol);
             scanf("%d", &ans);
             if (ans != ret)

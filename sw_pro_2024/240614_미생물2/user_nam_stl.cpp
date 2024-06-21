@@ -37,7 +37,7 @@ struct RangeSum {
         arr[idx] += value;
         groups[idx / sq] += value;
     }
-    int query(int left, int right) {
+    int query(int left, int right) { 
         int res = 0;
         int s = left / sq, e = right / sq;
 
