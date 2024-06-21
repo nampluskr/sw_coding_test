@@ -24,7 +24,7 @@ priority_queue<LifeData> lifePQ;
 
 int currentTime;
 
-struct SqrtDecomp {
+struct RangeSum {
     int arr[1'000'001];     // bacteria cnt at lifeSpan
     int groups[1'001];      // group sum
     int sq = 1'001;         // group size = sqrt(1'000'001)
@@ -61,10 +61,7 @@ void update(int currentTime) {
         bacteria[mID].mLifeSpan /= 2;
         SQ.update(bacteria[mID].mLifeSpan, +1);
 
-        if (bacteria[mID].mLifeSpan < 100) {
-            //SQ.update(bacteria[mID].mLifeSpan, -1);   // 100 <= mMinSpan
-            continue;
-        }
+        if (bacteria[mID].mLifeSpan < 100) continue;
         timePQ.push({ currentTime + bacteria[mID].mHalfTime, mID });
         lifePQ.push({ bacteria[mID].mLifeSpan, mID });
     }
