@@ -1,5 +1,5 @@
-// 최적화 OFF 564 ms vs. 최적화 ON 350 ms
-#if 1
+// 최적화 OFF 618 ms vs. 최적화 ON 350 ms
+#if 0
 #include <vector>
 #include <queue>
 // #include <set>
