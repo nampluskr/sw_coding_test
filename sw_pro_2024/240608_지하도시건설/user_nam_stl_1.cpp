@@ -1,8 +1,11 @@
-#if 1
+// 664 ms (range update + dijkstra)
+#if 0
 #include <vector>
 #include <queue>
 // #include <set>
 using namespace std;
+
+inline int min(int a, int b) { return (a < b)? a: b; }
 
 #define MAX_BOXES   10001   // dropBox() 함수는 최대 10,000 회 호출된다. 1 ~ 10000
 #define MAX_H       1000
