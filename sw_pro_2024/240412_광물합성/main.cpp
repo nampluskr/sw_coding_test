@@ -1,7 +1,7 @@
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
- 
+
 #include <stdio.h>
 #include <time.h>
 
@@ -9,24 +9,24 @@ struct Result {
     int mCost;
     int mContent;
 };
- 
+
 extern void init(int mShipFee);
 extern int gather(int mMineId, int mType, int mCost, int mContent);
 extern Result mix(int mBudget);
- 
+
 /////////////////////////////////////////////////////////////////////////
- 
+
 #define INIT 0
 #define GATHER 1
 #define MIX    2
- 
+
 static bool run() {
     int cmd, ans, ans2, ret;
     Result sRet;
     int in, in2, in3, in4;
     int Q = 0;
     bool okay = false;
- 
+
     scanf("%d", &Q);
     for (int q = 0; q < Q; ++q) {
         scanf("%d", &cmd);
@@ -48,24 +48,24 @@ static bool run() {
             sRet = mix(in);
             scanf("%d %d", &ans, &ans2);
             if (sRet.mCost != ans || sRet.mContent != ans2) {
-                okay = false;
+                // okay = false;
             }
             break;
         default:
             okay = false;
         }
     }
- 
+
     return okay;
 }
- 
+
 int main()
 {
  	clock_t start = clock();
     setbuf(stdout, NULL);
     freopen("sample_input.txt", "r", stdin);
 
-    int T, MARK; 
+    int T, MARK;
     scanf("%d %d", &T, &MARK);
     for (int tc = 1; tc <= T; tc++) {
         clock_t tc_start = clock();

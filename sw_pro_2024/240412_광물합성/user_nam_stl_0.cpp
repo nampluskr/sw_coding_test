@@ -1,3 +1,4 @@
+#if 0
 #include <vector>
 using namespace std;
 
@@ -62,3 +63,4 @@ Result mix(int mBudget)
     }
     return res;
 }
+#endif
