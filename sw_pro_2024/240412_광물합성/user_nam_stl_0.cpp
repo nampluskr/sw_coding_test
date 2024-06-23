@@ -10,15 +10,16 @@ struct Result {
 int mShipFee;           // 운송 비용 ( 1 ≤ mShipFee ≤ 40,000 )
 vector<Result> mineralList[2][3];  // mineralList[mMineId][mType]
 
-bool decision(int x, int target, Result& res) {
+bool decision(int content, int target, Result& res) {
     // update minCost[mMineId][mType]
     Result minCost[2][3];
     for (int i = 0; i < 2; i++)
         for (int j = 0; j < 3; j++) {
             minCost[i][j] = { 1000000, 0 };
             for (const auto& mineral: mineralList[i][j])
-                if (mineral.mContent <= x && mineral.mCost < minCost[i][j].mCost)
-                    minCost[i][j] = mineral;
+                if (mineral.mContent <= content)
+                    if (mineral.mCost < minCost[i][j].mCost)
+                        minCost[i][j] = { mineral.mCost, mineral.mContent };
         }
 
     // update costs[mMineId]
@@ -61,6 +62,13 @@ Result mix(int mBudget)
         if (decision(mid, mBudget, res)) lo = mid + 1;
         else hi = mid - 1;
     }
+
+    // 선택된 3개 광물 제거 처리
+    // mineralList[0, 1][0] = { cost0, content0 }
+    // mineralList[0, 1][1] = { cost1, content1 }
+    // mineralList[0, 1][2] = { cost2, content2 }
+
+
     return res;
 }
 #endif

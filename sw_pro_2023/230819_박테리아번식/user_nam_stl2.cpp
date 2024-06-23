@@ -57,7 +57,7 @@ int get_dist(int row1, int col1, int row2, int col2) {
     return abs(row1 - row2) + abs(col1 - col2);
 }
 
-priority_queue <BacData> bacQ;
+priority_queue<BacData> bacQ;
 priority_queue<PosData> posQ;
 
 /////////////////////////////////////////////////////////////////////
