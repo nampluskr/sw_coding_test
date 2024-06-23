@@ -8,10 +8,7 @@ using namespace std;
 
 // tree node
 struct Node {
-    int parent;
-    int depth;
-    vector<int> childList;
-    int mFirstday, mLastday;
+    int parent, depth, mFirstday, mLastday;
 } nodes[MAX_NODES];
 int nodeCnt;
 unordered_map<string, int> nodeMap;
@@ -69,7 +66,7 @@ void init(char mAncestor[], int mLastday)
     rsq.clear();
 
     int nIdx = get_nodeIndex(mAncestor);
-    nodes[nIdx] = { -1, 0, {}, 0, mLastday };
+    nodes[nIdx] = { -1, 0, 0, mLastday };
     rsq.updateRange(0, mLastday, 1);
 }
 
@@ -78,8 +75,7 @@ int add(char mName[], char mParent[], int mFirstday, int mLastday)
     int nIdx = get_nodeIndex(mName);
     int pIdx = get_nodeIndex(mParent);
 
-    nodes[nIdx] = { pIdx, nodes[pIdx].depth + 1, {}, mFirstday, mLastday };
-    nodes[pIdx].childList.push_back(nIdx);
+    nodes[nIdx] = { pIdx, nodes[pIdx].depth + 1, mFirstday, mLastday };
     rsq.updateRange(mFirstday, mLastday, 1);
 
     int res = nodes[nIdx].depth;
