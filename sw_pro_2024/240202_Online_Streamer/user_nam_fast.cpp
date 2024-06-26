@@ -78,24 +78,16 @@ struct RangeQuery {
         int s = lo / sq, e = hi / sq;
 
         if (s == e) {
-            for (int i = lo; i <= hi; i++) {
-                res.min = min(res.min, arr[i]);
-                res.max = max(res.max, arr[i]);
-            }
+            for (int i = lo; i <= hi; i++)
+                res = { min(res.min, arr[i]), max(res.max, arr[i]) };
             return res.max - res.min;
         }
-        for (int i = lo; i <= (s + 1) * sq - 1; i++) {
-            res.min = min(res.min, arr[i]);
-            res.max = max(res.max, arr[i]);
-        }
-        for (int i = s + 1; i <= e - 1; i++) {
-            res.min = min(res.min, groups[i].min.value);
-            res.max = max(res.max, groups[i].max.value);
-        }
-        for (int i = e * sq; i <= hi; i++) {
-            res.min = min(res.min, arr[i]);
-            res.max = max(res.max, arr[i]);
-        }
+        for (int i = lo; i <= (s + 1) * sq - 1; i++)
+            res = { min(res.min, arr[i]), max(res.max, arr[i]) };
+        for (int i = s + 1; i <= e - 1; i++)
+            res = { min(res.min, groups[i].min.value), max(res.max, groups[i].max.value) };
+        for (int i = e * sq; i <= hi; i++)
+            res = { min(res.min, arr[i]), max(res.max, arr[i]) };
         return res.max - res.min;
     }
 } rng;
