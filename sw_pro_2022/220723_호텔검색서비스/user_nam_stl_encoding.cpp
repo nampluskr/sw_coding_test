@@ -1,4 +1,4 @@
-#if 1
+#if 0
 #include <vector>
 #include <queue>
 using namespace std;
@@ -32,7 +32,7 @@ int encode(const RoomInfo& info) {
 }
 priority_queue<Room> roomMap[10'000];   // roomMap[0 ~ 9'999]
 
-bool check_booking(int mRoomID, int checkIn, int checkOut) {
+bool not_overlap(int mRoomID, int checkIn, int checkOut) {
     for (const auto& date : booking[mRoomID])
         if (checkOut > date.checkIn && date.checkOut > checkIn)
             return false;
@@ -72,7 +72,7 @@ int findRoom(int mFilter[])
         if (room.price != rooms[mRoomID].price) continue;
 
         popped.push_back(mRoomID);
-        if (check_booking(mRoomID, checkIn, checkOut)) {
+        if (not_overlap(mRoomID, checkIn, checkOut)) {
             booking[mRoomID].push_back({ checkIn, checkOut });
             res = mRoomID;
             break;

@@ -1,11 +1,11 @@
-#if 0
+#if 1
 #include <vector>
 #include <unordered_map>
 #include <queue>
 using namespace std;
 
-#define MAX_HOTELS  1'001            
-#define MAX_ROOMS   100'001        
+#define MAX_HOTELS  1'001
+#define MAX_ROOMS   100'001
 
 // hotels
 vector<int> roomList[MAX_HOTELS];
@@ -22,7 +22,7 @@ int roomCnt;
 
 struct RoomInfo {
     int regionNo, numBeds, roomType, viewType;
-    
+
     bool operator==(const RoomInfo& info) const {
         return regionNo == info.regionNo && numBeds == info.numBeds &&
                roomType == info.roomType && viewType == info.viewType;
@@ -42,7 +42,7 @@ struct hash<RoomInfo> {
 };
 unordered_map<RoomInfo, priority_queue<Room>> roomMap;
 
-bool check_booking(int mRoomID, int checkIn, int checkOut) {
+bool not_overlap(int mRoomID, int checkIn, int checkOut) {
     for (const auto& date : booking[mRoomID])
         if (checkOut > date.checkIn && date.checkOut > checkIn)
             return false;
@@ -82,7 +82,7 @@ int findRoom(int mFilter[])
         if (room.price != rooms[mRoomID].price) continue;
 
         popped.push_back(mRoomID);
-        if (check_booking(mRoomID, checkIn, checkOut)) {
+        if (not_overlap(mRoomID, checkIn, checkOut)) {
             booking[mRoomID].push_back({ checkIn, checkOut });
             res = mRoomID;
             break;
