@@ -1,68 +1,66 @@
 #include <queue>
 using namespace std;
 
-struct Bacterica {
-    int mLifeSpan;
-    int mHalfTime;
-} bacteria[30'000 + 1];
-//int bacteriaCnt;
+struct Bacterica { int mLifeSpan, mHalfTime; } bacteria[30001];
+int curTime;
 
+// priority queue
 struct TimeData {
     int mHalfTime, mID;
-    bool operator<(const TimeData& data) const { return mHalfTime > data.mHalfTime; }
+    bool operator<(const TimeData& data) const {
+        return mHalfTime > data.mHalfTime;
+    }
 };
 priority_queue<TimeData> timePQ;
 
 struct LifeData {
     int mLifeSpan, mID;
     bool operator<(const LifeData& data) const {
-        return (mLifeSpan > data.mLifeSpan) ||
-            (mLifeSpan == data.mLifeSpan && mID > data.mID);
+        return (mLifeSpan > data.mLifeSpan) || 
+               (mLifeSpan == data.mLifeSpan && mID > data.mID);
     }
 };
 priority_queue<LifeData> lifePQ;
 
-int currentTime;
+// sqrt decomposition
+struct RangeSumQuery {
+    int cnt[1000001];   // cnt at lifeSpan
+    int sum[1001];      // group sum
+    int sq = 1001;      // group size = sqrt(1000001)
 
-struct RangeSum {
-    int arr[1'000'001];     // bacteria cnt at lifeSpan
-    int groups[1'001];      // group sum
-    int sq = 1'001;         // group size = sqrt(1'000'001)
-
-    void clear() { 
-        memset(arr, 0, sizeof(arr)); 
-        memset(groups, 0, sizeof(groups));
+    void clear() {
+        memset(cnt, 0, sizeof(cnt));
+        memset(sum, 0, sizeof(sum));
     }
     void update(int idx, int value) {
-        arr[idx] += value;
-        groups[idx / sq] += value;
+        cnt[idx] += value;
+        sum[idx / sq] += value;
     }
-    int query(int left, int right) { 
+    int query(int lo, int hi) {
         int res = 0;
-        int s = left / sq, e = right / sq;
+        int s = lo / sq, e = hi / sq;
 
         if (s == e) {
-            for (int i = left; i <= right; i++) res += arr[i];
+            for (int i = lo; i <= hi; i++) res += cnt[i];
             return res;
         }
-        for (int i = left; i < (s + 1) * sq; i++) res += arr[i];
-        for (int i = s + 1; i <= e - 1; i++) res += groups[i];
-        for (int i = e * sq; i <= right; i++) res += arr[i];
+        while (lo / sq == s) res += cnt[lo++];
+        for (int i = s + 1; i <= e - 1; i++) res += sum[i];
+        while (hi / sq == e) res += cnt[hi--];
         return res;
     }
-} SQ;
+} rsq;
 
-
-void update(int currentTime) {
-    while (!timePQ.empty() && timePQ.top().mHalfTime == currentTime) {
+void update(int curTime) {
+    while (!timePQ.empty() && timePQ.top().mHalfTime == curTime) {
         int mID = timePQ.top().mID; timePQ.pop();
 
-        SQ.update(bacteria[mID].mLifeSpan, -1);
+        rsq.update(bacteria[mID].mLifeSpan, -1);
         bacteria[mID].mLifeSpan /= 2;
-        SQ.update(bacteria[mID].mLifeSpan, +1);
+        rsq.update(bacteria[mID].mLifeSpan, +1);
 
         if (bacteria[mID].mLifeSpan < 100) continue;
-        timePQ.push({ currentTime + bacteria[mID].mHalfTime, mID });
+        timePQ.push({ curTime + bacteria[mID].mHalfTime, mID });
         lifePQ.push({ bacteria[mID].mLifeSpan, mID });
     }
 }
@@ -70,63 +68,41 @@ void update(int currentTime) {
 //////////////////////////////////////////////////////////////////////
 void init()
 {
-    //for (int i = 1; i <= bacteriaCnt; i++) bacteria[i] = {};
-    currentTime = 0;
-    //bacteriaCnt = 0;
+    curTime = 0;
     timePQ = {};
     lifePQ = {};
-    SQ.clear();
+    rsq.clear();
 }
 
-// 30'000
 void addBacteria(int tStamp, int mID, int mLifeSpan, int mHalfTime)
 {
-    while (currentTime < tStamp) update(++currentTime);
+    while (curTime < tStamp) update(++curTime);
 
-    //bacteriaCnt = mID;
-    bacteria[mID].mLifeSpan = mLifeSpan;
-    bacteria[mID].mHalfTime = mHalfTime;
-
-    timePQ.push({ currentTime + mHalfTime, mID });
+    bacteria[mID] = { mLifeSpan, mHalfTime };
+    timePQ.push({ curTime + mHalfTime, mID });
     lifePQ.push({ mLifeSpan, mID });
-    SQ.update(mLifeSpan, +1);
+    rsq.update(mLifeSpan, +1);
 }
 
-// 1'000
 int getMinLifeSpan(int tStamp)
 {
-    while (currentTime < tStamp) update(++currentTime);
+    while (curTime < tStamp) update(++curTime);
 
     int res = -1;
     while (!lifePQ.empty() && lifePQ.top().mLifeSpan > 99) {
         auto data = lifePQ.top(); lifePQ.pop();
-        int mID = data.mID;
 
-        //if (data.mLifeSpan < 100) continue;
-        if (data.mLifeSpan != bacteria[mID].mLifeSpan) continue;
-
-        res = mID;
+        if (data.mLifeSpan != bacteria[data.mID].mLifeSpan) continue;
+        res = data.mID;
         lifePQ.push(data);
         break;
     }
     return res;
 }
 
-// 15'000
 int getCount(int tStamp, int mMinSpan, int mMaxSpan)
 {
-    while (currentTime < tStamp) update(++currentTime);
+    while (curTime < tStamp) update(++curTime);
 
-    // [방법-1] for-loop: 30'000 -> 시간 초과
-    //int res = 0;
-    //for (int i = 1; i <= bacteriaCnt; i++) {
-    //    if (bacteria[i].mLifeSpan < mMinSpan) continue;
-    //    if (bacteria[i].mLifeSpan > mMaxSpan) continue;
-    //    res++;
-    //}
-
-    // [방법-2] Sqrt Decomposition: sqrt(1'000'001) = 1'001
-    int res = SQ.query(mMinSpan, mMaxSpan);
-
-    return res;
+    return rsq.query(mMinSpan, mMaxSpan);
 }
