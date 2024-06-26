@@ -38,21 +38,21 @@ bool decision(int content, int mBudget, Result& res, int resMineId[], int resIdx
 	int cost2 = min(minCost[0][0].value, minCost[1][0].value) +
 				min(minCost[0][1].value, minCost[1][1].value) +
 				min(minCost[0][2].value, minCost[1][2].value) + mShipFee * 2;
-	int resCost = min(min(cost0, cost1), cost2);
+	int cost = min(min(cost0, cost1), cost2);
 
 	// 선택된 광물 정보 기록
-	if (resCost <= mBudget) {
-		res = { resCost, content };
+	if (cost <= mBudget) {
+		res = { cost, content };
 
-		if (cost0 == resCost)
+		if (cost == cost0)
 			for (int mType = 0; mType < 3; mType++) {
 				resMineId[mType] = 0; resIdx[mType] = minCost[0][mType].idx;
 			}
-		else if (cost1 == resCost)
+		else if (cost == cost1)
 			for (int mType = 0; mType < 3; mType++) {
 				resMineId[mType] = 1; resIdx[mType] = minCost[1][mType].idx;
 			}
-		else
+		else // cost == cost2
 			for (int mType = 0; mType < 3; mType++) {
 				if (minCost[0][mType].value < minCost[1][mType].value) {
 					resMineId[mType] = 0; resIdx[mType] = minCost[0][mType].idx;
@@ -62,7 +62,7 @@ bool decision(int content, int mBudget, Result& res, int resMineId[], int resIdx
 				}
 			}
 	}
-	return resCost <= mBudget;
+	return cost <= mBudget;
 }
 
 ///////////////////////////////////////////////////////////////////
