@@ -1,4 +1,5 @@
-﻿#include <vector>
+﻿#if 0
+#include <vector>
 #include <set>
 #include <queue>
 
@@ -174,3 +175,4 @@ int check(int cTime, int rID)
 	else
 		return cTime - robots[rID].totalWorkTime;	// IQ
 }
+#endif
