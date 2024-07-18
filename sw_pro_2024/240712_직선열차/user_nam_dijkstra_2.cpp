@@ -58,8 +58,7 @@ int dijkstra(int sTrain, int sStation, int eTrain, int eStation) {
 
     int res = -1;
     while (!pq.empty()) {
-        auto cur = pq.top();
-        pq.pop();
+        auto cur = pq.top(); pq.pop();
 
         if (trains[cur.train].state == REMOVED) continue;
         if (cur.train == eTrain && cur.station == eStation) { res = cur.cost; break; }

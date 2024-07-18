@@ -5,12 +5,11 @@
 #include <queue>
 using namespace std;
 
-#define MAX_TRAINS      (50 + 150)
-#define MAX_STATIONS    (100'000 + 1)
+#define MAX_TRAINS      (50 + 150)      // 열차 개수 (3 ≤ K ≤ 50)
+#define MAX_STATIONS    (100'000 + 1)   // 열차역 개수 (20 ≤ N ≤ 100,000)
 #define INF             1e6
 
 int N;        // 열차역 개수 (20 ≤ N ≤ 100,000)
-int K;        // 열차 개수 (3 ≤ K ≤ 50)
 
 // trains
 enum State { ADDED, REMOVED };
@@ -46,9 +45,9 @@ int get_trainIndex(int mId) {
     return tIdx;
 }
 
-int dijkstra(int sTrain, int sStation, int eTrain, int eStation) {
+int dijkstra(int sTrain, int sStation, int eTrain, int eStation, int curCost) {
     pq = {};
-    for (int i = 0; i < K + 150; i++)
+    for (int i = 0; i < trainCnt; i++)
         for (int j = 0; j <= N; j++)
             costDP[i][j] = INF;
 
@@ -57,9 +56,9 @@ int dijkstra(int sTrain, int sStation, int eTrain, int eStation) {
 
     int res = -1;
     while (!pq.empty()) {
-        auto cur = pq.top();
-        pq.pop();
+        auto cur = pq.top(); pq.pop();
 
+        if (cur.cost >= curCost) { res = cur.cost; break; }     // 가지치기
         if (trains[cur.train].state == REMOVED) continue;
         if (cur.train == eTrain && cur.station == eStation) { res = cur.cost; break; }
         if (costDP[cur.train][cur.station] < cur.cost) continue;
@@ -81,7 +80,7 @@ void add(int mId, int sId, int eId, int mInterval);
 
 void init(int N, int K, int mId[], int sId[], int eId[], int mInterval[])
 {
-    ::N = N, ::K = K;
+    ::N = N;
     trainCnt = 0;
     trainMap.clear();
 
@@ -128,7 +127,7 @@ int calculate(int sId, int eId)
         for (int eTrain : trainList[eId]) {
             if (trains[eTrain].state == REMOVED) continue;
 
-            int minCost = dijkstra(sTrain, sId, eTrain, eId);
+            int minCost = dijkstra(sTrain, sId, eTrain, eId, res);
             if (minCost == -1) continue;
             if (minCost < res) res = minCost;
         }
