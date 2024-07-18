@@ -58,7 +58,7 @@ int dijkstra(int sTrain, int sStation, int eTrain, int eStation, int curCost) {
     while (!pq.empty()) {
         auto cur = pq.top(); pq.pop();
 
-        if (cur.cost >= curCost) { res = cur.cost; break; }     // 가지치기
+        if (cur.cost >= curCost) { res = cur.cost; break; }     // pruning
         if (trains[cur.train].state == REMOVED) continue;
         if (cur.train == eTrain && cur.station == eStation) { res = cur.cost; break; }
         if (costDP[cur.train][cur.station] < cur.cost) continue;
@@ -66,8 +66,8 @@ int dijkstra(int sTrain, int sStation, int eTrain, int eStation, int curCost) {
         for (const auto next : adjList[cur.train][cur.station]) {
             if (trains[next.train].state == REMOVED) continue;
 
-            if (costDP[next.train][next.station] > next.cost + cur.cost) {
-                costDP[next.train][next.station] = next.cost + cur.cost;
+            if (costDP[next.train][next.station] > next.cost + costDP[cur.train][cur.station]) {
+                costDP[next.train][next.station] = next.cost + costDP[cur.train][cur.station];
                 pq.push({ next.train, next.station, costDP[next.train][next.station] });
             }
         }
