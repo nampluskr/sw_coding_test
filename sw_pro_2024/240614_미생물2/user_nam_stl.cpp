@@ -1,4 +1,5 @@
 #include <queue>
+#include <cstring>      // memset()
 using namespace std;
 
 struct Bacterica { int mLifeSpan, mHalfTime; } bacteria[30001];
