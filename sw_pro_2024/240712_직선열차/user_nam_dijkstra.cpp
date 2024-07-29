@@ -1,30 +1,23 @@
-// 18.734 s (/O2)
 #if 0
 #include <unordered_map>
 #include <vector>
 #include <queue>
 using namespace std;
 
-#define MAX_TRAINS      (50 + 150)
-#define MAX_STATIONS    (100'000 + 1)
-#define INF             1e6
+#define MAX_TRAINS      (50 + 150)      // 열차 개수 (3 ≤ K ≤ 50)
+#define MAX_STATIONS    (100'000 + 1)   // 열차역 개수 (20 ≤ N ≤ 100,000)
+#define INF             (MAX_TRAINS + 1)
 
-int N;        // 열차역 개수 (20 ≤ N ≤ 100,000)
-int K;        // 열차 개수 (3 ≤ K ≤ 50)
+int N;
 
 // trains
-enum State { ADDED, REMOVED };
-
-struct Train {
-    int mId, sId, eId, mInterval;
-    State state;
-} trains[MAX_TRAINS];
+enum State { ADDED, REMOVED } states[MAX_TRAINS];
 
 int trainCnt;
 unordered_map<int, int> trainMap;
 vector<int> trainList[MAX_STATIONS];
 
-// graph
+// dijkstra
 struct Edge {
     int train, station, cost;
     bool operator<(const Edge& edge) const { return cost > edge.cost; }
@@ -35,36 +28,36 @@ priority_queue<Edge> pq;
 int costDP[MAX_TRAINS][MAX_STATIONS];
 
 //////////////////////////////////////////////////////////////////////
-int get_trainIndex(int mId) {
-    int tIdx;
+int get_train(int mId) {
+    int train;
     auto iter = trainMap.find(mId);
     if (iter == trainMap.end()) {
-        tIdx = trainCnt++;
-        trainMap.emplace(mId, tIdx);
+        train = trainCnt++;
+        trainMap.emplace(mId, train);
     }
-    else tIdx = iter->second;
-    return tIdx;
+    else train = iter->second;
+    return train;
 }
 
-int dijkstra(int sTrain, int sStation, int eTrain, int eStation) {
+int dijkstra(int sTrain, int sStation, int eTrain, int eStation, int curCnt) {
     pq = {};
-    for (int i = 0; i < K + 150; i++)
+    for (int i = 0; i < trainCnt; i++)
         for (int j = 0; j <= N; j++)
             costDP[i][j] = INF;
 
     costDP[sTrain][sStation] = 0;
     pq.push({ sTrain, sStation, costDP[sTrain][sStation] });
 
-    int res = -1;
     while (!pq.empty()) {
         auto cur = pq.top(); pq.pop();
 
-        if (trains[cur.train].state == REMOVED) continue;
-        if (cur.train == eTrain && cur.station == eStation) { res = cur.cost; break; }
+        if (states[cur.train]== REMOVED) continue;
+        if (cur.cost >= curCnt) { return -1; }
+        if (cur.train == eTrain && cur.station == eStation) { return cur.cost; }
         if (costDP[cur.train][cur.station] < cur.cost) continue;
 
         for (const auto next : adjList[cur.train][cur.station]) {
-            if (trains[next.train].state == REMOVED) continue;
+            if (states[next.train] == REMOVED) continue;
 
             if (costDP[next.train][next.station] > next.cost + cur.cost) {
                 costDP[next.train][next.station] = next.cost + cur.cost;
@@ -72,7 +65,7 @@ int dijkstra(int sTrain, int sStation, int eTrain, int eStation) {
             }
         }
     }
-    return res;
+    return -1;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -80,7 +73,7 @@ void add(int mId, int sId, int eId, int mInterval);
 
 void init(int N, int K, int mId[], int sId[], int eId[], int mInterval[])
 {
-    ::N = N, ::K = K;
+    ::N = N;
     trainCnt = 0;
     trainMap.clear();
 
@@ -95,44 +88,46 @@ void init(int N, int K, int mId[], int sId[], int eId[], int mInterval[])
 
 void add(int mId, int sId, int eId, int mInterval)
 {
-    int tIdx = get_trainIndex(mId);
-    trains[tIdx] = { mId, sId, eId, mInterval, ADDED };
+    int train = get_train(mId);
+    states[train] = ADDED;
 
-    for (int i = sId; i <= eId - mInterval; i += mInterval) {
-        adjList[tIdx][i].push_back({ tIdx, i + mInterval, 0 });
-        adjList[tIdx][i + mInterval].push_back({ tIdx, i, 0 });
+    // 열차역 노드 추가 (가중치 0)
+    for (int station = sId; station <= eId - mInterval; station += mInterval) {
+        adjList[train][station].push_back({ train, station + mInterval, 0 });
+        adjList[train][station + mInterval].push_back({ train, station, 0 });
     }
 
-    for (int i = sId; i <= eId; i += mInterval) {
-        for (int train : trainList[i]) {
-            adjList[tIdx][i].push_back({ train, i, 1 });
-            adjList[train][i].push_back({ tIdx, i, 1 });
+    // 열차 노드 추가 (가중치 1)
+    for (int station = sId; station <= eId; station += mInterval) {
+        for (int other : trainList[station]) {
+            adjList[train][station].push_back({ other, station, 1 });
+            adjList[other][station].push_back({ train, station, 1 });
         }
-        trainList[i].push_back(tIdx);
+        trainList[station].push_back(train);
     }
 }
 
 void remove(int mId)
 {
-    int tIdx = get_trainIndex(mId);
-    trains[tIdx].state = REMOVED;
+    int train = get_train(mId);
+    states[train] = REMOVED;
 }
 
 int calculate(int sId, int eId)
 {
     int res = INF;
     for (int sTrain : trainList[sId]) {
-        if (trains[sTrain].state == REMOVED) continue;
+        if (states[sTrain] == REMOVED) continue;
 
         for (int eTrain : trainList[eId]) {
-            if (trains[eTrain].state == REMOVED) continue;
+            if (states[eTrain] == REMOVED) continue;
 
-            int minCost = dijkstra(sTrain, sId, eTrain, eId);
-            if (minCost == -1) continue;
-            if (minCost < res) res = minCost;
+            int minCnt = dijkstra(sTrain, sId, eTrain, eId, res);
+            if (minCnt == -1) continue;
+            if (minCnt < res) res = minCnt;
         }
     }
-    if (res == INF) res = -1;
+    if (res == INF) return -1;
     return res;
 }
 #endif
