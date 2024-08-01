@@ -8,15 +8,12 @@ using namespace std;
 
 inline int min(int a, int b) { return (a < b)? a: b; };
 
-int N;  // N : 저자의 수 (3 ≤ N ≤ 10,000), 저자의 ID 는 1 이상 N 이하이다.
-int C;  // C : 책 카테고리의 수 (3 ≤ C ≤ 20)
-
 // books
 enum State { ADDED, REMOVED };
 
 struct Book {
     int cID, price, num;
-    State state;
+    State state;    // 입고 (ADDED), 절판 (REMOVED)
     int stock;      // 재고량
     int sales;      // 판매량
     vector<int> authorList;
@@ -47,15 +44,15 @@ priority_queue<AuthorData> authorPQ;
 ////////////////////////////////////////////////////////////////////////
 void init(int N, int C)
 {
-    ::N = N, ::C = C;
-    for (int i = 0; i < MAX_BOOKS; i++) books[i] = {};
-    for (int i = 0; i < MAX_AUTHORS; i++) authors[i] = {};
-    for (int i = 0; i < MAX_CATEGORIES; i++) {
+    // for (int i = 0; i < MAX_BOOKS; i++) books[i] = {};
+    for (int i = 1; i < N; i++) authors[i] = {};
+    for (int i = 0; i < C; i++) {
         bookPQ[i] = {};
         bookCnt[i] = 0;
     }
     authorPQ = {};
 
+    // 저자의 ID 는 1 이상 N 이하이다.
     for (int aID = 1; aID <= N; aID++) authorPQ.push({ 0, aID });
 }
 
@@ -63,14 +60,14 @@ void addBookInfo(int bID, int cID, int price, int num, int aIDs[])
 {
     books[bID] = { cID, price, num, ADDED };
     books[bID].stock++;
-    for (int i = 0; i < num; i++) {
+    for (int i = 0; i < num; i++)
         books[bID].authorList.push_back(aIDs[i]);
-        // authors[i] = { 0, bID };
-        // authorPQ.push({ 0, aIDs[i] });
-    }
 
-    bookPQ[cID].push({ 0, bID });   bookCnt[cID]++;
-    bookPQ[0].push({ 0, bID });     bookCnt[0]++;
+    bookPQ[cID].push({ 0, bID });
+    bookCnt[cID]++;
+    
+    bookPQ[0].push({ 0, bID });
+    bookCnt[0]++;
 }
 
 void addBookStock(int bID, int cnt)
@@ -89,8 +86,8 @@ int sellBooks(int bID, int cnt)
 {
     int res = 0;
     auto& book = books[bID];
-    if (book.stock >= cnt) {
 
+    if (book.stock >= cnt) {
         book.stock -= cnt;
         book.sales += cnt;
         bookPQ[book.cID].push({ book.sales, bID });
@@ -105,8 +102,6 @@ int sellBooks(int bID, int cnt)
     return res;
 }
 
-// 만약 판매량이 같을 경우, 책의 ID 값이 더 큰 것이 우선이다.
-// bIDs[] 배열에는 절판 되지 않은 책들만 저장되어 있어야 함에 유의하라.
 int getBestSeller(int cID, int bIDs[])
 {
     auto& pq = bookPQ[cID];
@@ -122,14 +117,12 @@ int getBestSeller(int cID, int bIDs[])
         popped.push_back(book.bID);
         bIDs[cnt++] = book.bID;
     }
-    for (int bID: popped) pq.push({ books[bID].sales, bID });
+    for (int bID: popped)
+        pq.push({ books[bID].sales, bID });
 
-    int res = min(3, bookCnt[cID]);
-    return res;
+    return min(3, bookCnt[cID]);
 }
 
-// 이때, 저자의 수익은 절판된 책에서 올린 수익도 포함한다.
-// 수익이 같다면 저자의 ID가 작은 것을 우선으로 aIDs[] 배열에 저장하여 반환한다.
 void getBestAuthors(int aIDs[])
 {
     auto& pq = authorPQ;
@@ -144,5 +137,6 @@ void getBestAuthors(int aIDs[])
         popped.push_back(author.aID);
         aIDs[cnt++] = author.aID;
     }
-    for (int aID: popped) pq.push({ authors[aID].income, aID });
+    for (int aID: popped)
+        pq.push({ authors[aID].income, aID });
 }
