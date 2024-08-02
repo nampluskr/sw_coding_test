@@ -20,7 +20,6 @@ extern int removeChild(char mTag[]);
 extern int addTag(char mTag[]);
 
 /////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
 
 static int mSeed;
 static int pseudo_rand(void)
@@ -141,18 +140,19 @@ int main()
     clock_t start = clock();
     setbuf(stdout, NULL);
     freopen("sample_input.txt", "r", stdin);
-   
+
     int T, Ans;
     scanf("%d %d", &T, &Ans);
-   
+
     for (int tc = 1; tc <= T; tc++) {
         clock_t tc_start = clock();
         int score = run(Ans);
-        int tc_result = (clock() - tc_result) / (CLOCKS_PER_SEC / 1000);
+        int tc_result = (clock() - tc_start) / (CLOCKS_PER_SEC / 1000);
         printf("#%2d %d (%3d ms)\n", tc, score, tc_result);
+        // printf("#%2d %d\n", tc, run(Ans));
     }
     int result = (clock() - start) / (CLOCKS_PER_SEC / 1000);
     printf(">> Result: %d ms\n", result);
-   
+
     return 0;
 }
