@@ -2,6 +2,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 #define MAX_OBJECTS 100'000
@@ -20,9 +21,11 @@ vector<int> selectedObjList;
 // dfs
 int removeAll(int obj) {
     int cnt = 1;
-    for (int child : objects[obj].childList)
+    for (int child : objects[obj].childList) {
+        if (objects[child].state == REMOVED) continue;
         cnt += removeAll(child);
-    // objects[obj].tagList.clear();
+        objects[child].state = REMOVED;    
+    }
     objects[obj].state = REMOVED;
     return cnt;
 }
@@ -59,8 +62,8 @@ int addChild(char mTag[])
     for (int obj : selectedObjList) {
         if (objects[obj].state == REMOVED) continue;
         int child = objectCnt++;
-        objects[child].tagList.insert(mTag);
         objects[obj].childList.push_back(child);
+        objects[child].tagList.insert(mTag);
         res++;
     }
     return res;
@@ -72,18 +75,16 @@ int removeChild(char mTag[])
     for (int obj : selectedObjList) {
         if (objects[obj].state == REMOVED) continue;
 
-         // sub 객체를 지울때 마지막 원소를 이동시키므로 뒤에서부터 loop를 돈다.
         for (int i = objects[obj].childList.size() - 1; i >= 0; i--) {
+        // for (sint i = 0; i < objects[obj].childList.size(); i++) {
             int child = objects[obj].childList[i];
             if (objects[child].state == REMOVED) continue;
 
-            // or 앞에서부터 돌고 지워지지 않은 경우에만 i를 증가
             if (objects[child].tagList.count(mTag)) {
                 res += removeAll(child);
 
-                // 마지막 원소를 i로 move
-                objects[obj].childList[i] = objects[obj].childList.back();
-                objects[obj].childList.pop_back();
+                auto& vec = objects[obj].childList;
+                vec.erase(find(vec.begin(), vec.end(), child));
             }
         }
     }
@@ -95,8 +96,8 @@ int addTag(char mTag[])
     int res = 0;
     for (int obj : selectedObjList) {
         if (objects[obj].state == REMOVED) continue;
-        if (objects[obj].tagList.size() >= 5) continue;
         if (objects[obj].tagList.count(mTag)) continue;
+        if (objects[obj].tagList.size() >= 5) continue;
 
         objects[obj].tagList.insert(mTag);
         res++;

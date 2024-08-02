@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include <set>
 #include <cstring>
@@ -16,26 +16,31 @@ struct Object {
     set<string> tagList;
     State state;
 } objects[MAX_OBJECTS];
-int objCnt;
+int objectCnt;
 
-string selectedTag;
 vector<int> selectedObjList;
+
+bool findTag(const vector<string> tagList, const char mTag[]) {
+    for (const auto& tag: tagList)
+        if (tag == string(mTag)) return true;
+    return false;
+}
+
 
 
 /////////////////////////////////////////////////////////////////////
+// int selectAll(char mTag[]);
+// int addChild(char mTag[]);
+
 void init()
 {
-    for (int i = 0; i < objCnt; i++) {
-        objects[i].childList.clear();
-        objects[i].tagList.clear();
-        objects[i].state = ADDED;
-    }
+    for (int i = 0; i < objectCnt; i++) objects[i] = {};
     selectedObjList.clear();
-    objCnt = 0;
+    objectCnt = 0;
 
-    int obj = objCnt++;
+    int obj = objectCnt++;
     objects[obj].tagList.insert("root");
-    selectedTag = "root";
+    objects[obj].state = ADDED;
     selectedObjList.push_back(obj);
 }
 
@@ -43,10 +48,10 @@ int selectAll(char mTag[])
 {
     selectedObjList.clear();
     int res = 0;
-    for (int obj = 0; obj < objCnt; obj++) {
+    for (int obj = 0; obj < objectCnt; obj++) {
         if (objects[obj].state == REMOVED) continue;
         if (objects[obj].tagList.count(mTag)) {
-            selectedObjList.push_back(obj);
+            // selectedObjList.push_back(obj);
             res++;
         }
     }
@@ -56,9 +61,9 @@ int selectAll(char mTag[])
 int addChild(char mTag[])
 {
     int res = 0;
-    for (const auto& obj: selectedObjList) {
+    for (int obj: selectedObjList) {
         if (objects[obj].state == REMOVED) continue;
-        int child = objCnt++;
+        int child = objectCnt++;
         objects[obj].childList.push_back(child);
         objects[child].tagList.insert(mTag);
         res++;
