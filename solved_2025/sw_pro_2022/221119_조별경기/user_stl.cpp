@@ -1,4 +1,4 @@
-﻿#if 1   // 588 ms
+﻿#if 0   // 588 ms
 #include <vector>
 using namespace std;
 

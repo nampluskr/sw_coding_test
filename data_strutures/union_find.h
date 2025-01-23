@@ -14,14 +14,20 @@ struct UninFind {
     }
     int find(int x) {
         if (parent[x] == x) return x;
-        return parent[x] = find(parent[x]);
+        int root = find(parent[x]);
+
+        // Path Compression
+        if (root != parent[x]) {
+            parent[x] = root;
+        }
+        return root;
     }
     void merge(int x, int y) {
         x = find(x);
         y = find(y);
         if (x == y) return;
-
         if (rank[x] < rank[y]) swap(x, y);
+
         parent[y] = x;
         if (rank[x] == rank[y]) rank[x]++;
     }

@@ -1,4 +1,4 @@
-﻿#if 0   // 483 ms
+﻿#if 0   // 466 ms
 #include "array.h"
 inline void swap(int& a, int& b) { int temp = a; a = b; b = temp; }
 

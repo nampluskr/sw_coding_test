@@ -9,9 +9,10 @@ struct Array {
     ~Array() { delete[] arr; }
 
     void clear() { 
-        tail = -1, capacity = 1;
-        delete[] arr;
-        arr = new T[capacity];
+        tail = -1;
+        // delete[] arr;
+        // capacity = 1;
+        // arr = new T[capacity];
     }
     void push_back(const T& data) {
         if (tail == capacity - 1) resize(capacity * 2);
