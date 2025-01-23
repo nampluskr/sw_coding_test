@@ -10,9 +10,10 @@ int scores[MAX_SIZE];   // player 의 score
 // find
 int findTeam(int x) {
     if (x == teams[x]) return x;
-    int teamID = findTeam(teams[x]);
+    // return teams[x] = findTeam(teams[x]);
 
     // Path Compression
+    int teamID = findTeam(teams[x]);
     if (teamID != teams[x]) {
         scores[x] += scores[teams[x]];
         teams[x] = teamID;
