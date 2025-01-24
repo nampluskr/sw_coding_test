@@ -1,4 +1,4 @@
-﻿#if 0   // 588 ms
+﻿#if 0   // 588 ms (가독성 개선)
 #include <vector>
 using namespace std;
 
@@ -8,7 +8,7 @@ using namespace std;
 struct Player {
     int mScore;
     int teamID;
-} players[MAX_PLAYERS];     // 선수 ID 1부터 시작
+} players[MAX_PLAYERS];
 
 struct Team {
     int mScore;
@@ -18,33 +18,40 @@ struct Team {
 //////////////////////////////////////////////////////////////////////
 void init(int N)
 {
+    // 선수 ID 1부터 시작
     for (int i = 1; i <= N; i++) {
         players[i] = { 0, i };
+        teams[i].playerList.clear();
         teams[i] = { 0, {i} };
     }
 }
 
 void updateScore(int mWinnerID, int mLoserID, int mScore)
 {
-    int winnerTeam = players[mWinnerID].teamID;
-    int loserTeam = players[mLoserID].teamID;
-    teams[winnerTeam].mScore += mScore;
-    teams[loserTeam].mScore -= mScore;
+    auto& winnerTeam = teams[players[mWinnerID].teamID];
+    auto& loserTeam = teams[players[mLoserID].teamID];
+
+    winnerTeam.mScore += mScore;
+    loserTeam.mScore -= mScore;
 }
 
 void unionTeam(int mPlayerA, int mPlayerB)
 {
-    int teamA = players[mPlayerA].teamID;
-    int teamB = players[mPlayerB].teamID;
-    if (teams[teamA].playerList.size() < teams[teamB].playerList.size())
-        swap(teamA, teamB);
+    int teamA_size = teams[players[mPlayerA].teamID].playerList.size();
+    int teamB_size = teams[players[mPlayerB].teamID].playerList.size();
+    if (teamA_size < teamB_size) 
+        swap(mPlayerA, mPlayerB);
 
-    for (int playerID: teams[teamB].playerList) {
-        players[playerID].mScore += teams[teamB].mScore - teams[teamA].mScore;
-        players[playerID].teamID = teamA;
-        teams[teamA].playerList.push_back(playerID);
+    auto& teamA = teams[players[mPlayerA].teamID];
+    auto& teamB = teams[players[mPlayerB].teamID];
+
+    for (int mID: teamB.playerList) {
+        auto& playerB = players[mID];
+        playerB.mScore += teamB.mScore - teamA.mScore;
+        playerB.teamID = players[mPlayerA].teamID;
+        teamA.playerList.push_back(mID);
     }
-    // teams[teamB].playerList.clear();
+    // teamB.playerList.clear();
 }
 
 int getScore(int mID)
