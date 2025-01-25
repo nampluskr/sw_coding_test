@@ -1,4 +1,4 @@
-﻿#if 0   // 530 ms (STL)
+﻿#if 0   // (풀이중) xxx ms (Union Find)
 #include <unordered_map>
 #include <vector>
 
@@ -15,21 +15,50 @@ struct House {
 int houseCnt;
 std::unordered_map<int, int> houseMap;
 
+int L;      // L: 마을을 이루는 기준 거리 ( 10 ≤ L ≤ 200 )
+int R;      // R: X좌표와 Y좌표의 최댓값 ( 25 ≤ R ≤ L x 100 )
+int bucketSize;                 // group size = sqrt(R + 1)
+std::vector<int> buckets[MAX_BUCKETS][MAX_BUCKETS];
+
+// Union-find
+int parent[MAX_HOUSES];
+int rank[MAX_HOUSES];
+int size[MAX_HOUSES];
+int minId[MAX_HOUSES];
+
 struct Village {
     int minId, size;
     std::vector<int> houseList;
 } villages[MAX_HOUSES];
 int villageCnt;
 
-int L;      // L: 마을을 이루는 기준 거리 ( 10 ≤ L ≤ 200 )
-int R;      // R: X좌표와 Y좌표의 최댓값 ( 25 ≤ R ≤ L x 100 )
-int bucketSize;                 // group size = sqrt(R + 1)
-std::vector<int> buckets[MAX_BUCKETS][MAX_BUCKETS];
-
 /////////////////////////////////////////////////////////////////////
 // Helper Functions
 
+int find(int x) {
+    if (parent[x] == x) return x;
+
+    int root = find(parent[x]);
+    if (parent[x] != root) {
+        size[x] += size[parent[x]];
+        minId[x] = std::min(minId[x], minId[parent[x]]);
+        parent[x] = root;
+    }
+    return root;
+}
 void merge(int x, int y) {
+    x = find(x);
+    y = find(y);
+    if (x == y) return;
+
+    if (rank[x] < rank[y]) std::swap(x, y);
+    parent[y] = x;
+    size[y] -= size[x];
+    minId[y] = std::min(minId[y], minId[x]);
+    if (rank[x] == rank[y]) rank[x]++;
+}
+
+void _merge(int x, int y) {
     if (x == y) return;
     if (villages[x].size < villages[y].size)
         std::swap(x, y);
@@ -94,7 +123,12 @@ int add(int mId, int mX, int mY) {
     villages[hIdx] = { mId, 1, { hIdx } };
     villageCnt++;
 
-    // L 거리내에 있는 집들과 merge
+    parent[hIdx] = hIdx;
+    rank[hIdx] = 1;
+    size[hIdx] = 1;
+    minId[hIdx] = mId;
+
+    // L 거리내에 있는 집들과 _merge
     int sX = std::max((mX - L) / bucketSize, 0);
     int sY = std::max((mY - L) / bucketSize, 0);
     int eX = std::min((mX + L) / bucketSize, R / bucketSize);

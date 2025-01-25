@@ -1,4 +1,4 @@
-﻿#if 1   // 480 ms (STL)
+﻿#if 0   // 480 ms (STL)
 #include "unordered_map.h"
 #include "vector.h"
 
@@ -87,8 +87,8 @@ void init(int L, int R) {
         houses[i] = {};
         villages[i].houseList.clear();
     }
-    for (int i = 0; i < MAX_BUCKETS; i++)
-        for (int j = 0; j < MAX_BUCKETS; j++)
+    for (int i = 0; i < R / bucketSize; i++)
+        for (int j = 0; j < R / bucketSize; j++)
             buckets[i][j].clear();
 }
 

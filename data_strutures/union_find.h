@@ -14,9 +14,9 @@ struct UninFind {
     }
     int find(int x) {
         if (parent[x] == x) return x;
-        int root = find(parent[x]);
 
         // Path Compression
+        int root = find(parent[x]);
         if (root != parent[x]) {
             parent[x] = root;
         }
@@ -26,8 +26,8 @@ struct UninFind {
         x = find(x);
         y = find(y);
         if (x == y) return;
-        if (rank[x] < rank[y]) swap(x, y);
 
+        if (rank[x] < rank[y]) swap(x, y);
         parent[y] = x;
         if (rank[x] == rank[y]) rank[x]++;
     }
