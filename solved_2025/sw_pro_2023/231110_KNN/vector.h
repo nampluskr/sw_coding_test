@@ -1,18 +1,18 @@
 ﻿#pragma once
 
 template<typename T>
-struct Array {
+struct Vector {
     T* arr;
     int tail = -1, capacity = 1;
 
-    Array() { arr = new T[capacity]; }
-    ~Array() { delete[] arr; }
+    Vector() { arr = new T[capacity]; }
+    ~Vector() { delete[] arr; }
 
     void clear() { 
         tail = -1;
-        delete[] arr;
-        capacity = 1;
-        arr = new T[capacity];
+        // delete[] arr;
+        // capacity = 1;
+        // arr = new T[capacity];
     }
     void push_back(const T& data) {
         if (tail == capacity - 1) resize(capacity * 2);

@@ -1,6 +1,5 @@
-﻿#if 0   // 588 ms (가독성 개선)
+﻿#if 0   // 593 ms (가독성 개선)
 #include <vector>
-using namespace std;
 
 #define MAX_PLAYERS 100'001 // N: 조별 경기에 참가한 선수들의 수
 
@@ -12,7 +11,7 @@ struct Player {
 
 struct Team {
     int mScore;
-    vector<int> playerList;
+    std::vector<int> playerList;
 } teams[MAX_PLAYERS];
 
 //////////////////////////////////////////////////////////////////////
@@ -40,7 +39,7 @@ void unionTeam(int mPlayerA, int mPlayerB)
     int teamA_size = teams[players[mPlayerA].teamID].playerList.size();
     int teamB_size = teams[players[mPlayerB].teamID].playerList.size();
     if (teamA_size < teamB_size) 
-        swap(mPlayerA, mPlayerB);
+        std::swap(mPlayerA, mPlayerB);
 
     auto& teamA = teams[players[mPlayerA].teamID];
     auto& teamB = teams[players[mPlayerB].teamID];

@@ -1,4 +1,4 @@
-﻿#if 1   // 454 ms (Manual Array List)
+﻿#if 0   // 454 ms (Manual Array List)
 #include "array.h"
 inline void swap(int& a, int& b) { int temp = a; a = b; b = temp; }
 

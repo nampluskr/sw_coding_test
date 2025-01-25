@@ -1,8 +1,7 @@
-﻿#if 0   // 539 ms (STL)
+﻿#if 1   // 530 ms (STL)
 #include <vector>
 #include <queue>
 #include <unordered_map>
-using namespace std;
 
 #define MAX_SAMPLES 200'000     // addSample() 함수의 호출 횟수는 20,000 이하
 #define MAX_X       4'000       // mX : x축 위치 (1 ≤ mX ≤ 4,000)
@@ -20,8 +19,8 @@ struct Sample {
 } samples[MAX_SAMPLES];
 
 int sampleCnt; 
-unordered_map<int, int> sampleMap;
-vector<int> sampleList[MAX_BUCKETS][MAX_BUCKETS];
+std::unordered_map<int, int> sampleMap;
+std::vector<int> sampleList[MAX_BUCKETS][MAX_BUCKETS];
 
 int K;                      // K : 최근접 이웃의 개수 (3 ≤ K ≤ 11)
 int L;                      // L : 이상치를 판별하기 위한 길이 (4 ≤ L ≤ 100)
@@ -65,12 +64,12 @@ void deleteSample(int mID)
 
 int predict(int mX, int mY)
 {
-    int sX = max((mX - L) / bucketSize, 0);
-    int sY = max((mY - L) / bucketSize, 0);
-    int eX = min((mX + L) / bucketSize, MAX_X / bucketSize);
-    int eY = min((mY + L) / bucketSize, MAX_Y / bucketSize);
+    int sX = std::max((mX - L) / bucketSize, 0);
+    int sY = std::max((mY - L) / bucketSize, 0);
+    int eX = std::min((mX + L) / bucketSize, MAX_X / bucketSize);
+    int eY = std::min((mY + L) / bucketSize, MAX_Y / bucketSize);
 
-    priority_queue<Data> pq;
+    std::priority_queue<Data> pq;
     for (int i = sX; i <= eX; i++)
         for (int j = sY; j <= eY; j++)
             for (int sIdx : sampleList[i][j]) {

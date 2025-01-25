@@ -1,12 +1,11 @@
-﻿#if 1   // 539 ms (STL)
-#include "array.h"              // <vector>
+﻿#if 0   // 359 ms (Manual)
+#include "vector.h"              // <vector>
 #include "priority_queue.h"     // <queue> priority_queue
-#include <unordered_map>
+#include "unordered_map.h"      // <unordered_map>
 
 inline int min(int a, int b) { return (a < b) ? a: b; }
 inline int max(int a, int b) { return (a < b) ? b: a; }
 inline int abs(int x) { return (x > 0) ? x : -x; }
-
 
 #define MAX_SAMPLES 200'000     // addSample() 함수의 호출 횟수는 20,000 이하
 #define MAX_X       4'000       // mX : x축 위치 (1 ≤ mX ≤ 4,000)
@@ -24,8 +23,8 @@ struct Sample {
 } samples[MAX_SAMPLES];
 
 int sampleCnt; 
-std::unordered_map<int, int> sampleMap;
-Array<int> sampleList[MAX_BUCKETS][MAX_BUCKETS];
+UnorderedMap<int, int> sampleMap;
+Vector<int> sampleList[MAX_BUCKETS][MAX_BUCKETS];
 
 int K;                      // K : 최근접 이웃의 개수 (3 ≤ K ≤ 11)
 int L;                      // L : 이상치를 판별하기 위한 길이 (4 ≤ L ≤ 100)

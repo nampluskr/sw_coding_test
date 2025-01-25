@@ -1,4 +1,4 @@
-﻿#if 0   // 434 ms (Union Find)
+﻿#if 1   // 434 ms (Union Find)
 #define MAX_SIZE    100'001
 
 void swap(int& x, int& y) { int temp = x; x = y; y = temp; }
