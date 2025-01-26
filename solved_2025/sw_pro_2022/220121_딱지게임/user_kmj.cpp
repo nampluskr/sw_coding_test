@@ -1,4 +1,4 @@
-#if 0   // 2562 ms (KMJ)
+#if 0   // 1160 ms (KMJ)
 #define P_COUNT 20
 
 const int MAX_SIZE = 20000;

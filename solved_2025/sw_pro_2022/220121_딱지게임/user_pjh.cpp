@@ -1,4 +1,4 @@
-#if 1   // 875 ms (wsl)
+#if 0   // 875 ms (wsl)
 #include <vector>
 using namespace std;
 
@@ -164,3 +164,4 @@ int check(int mRow, int mCol)
     }
     return 0;
 }
+#endif
