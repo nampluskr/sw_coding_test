@@ -1,7 +1,8 @@
-﻿#pragma once
+﻿## Unordered Map
 
+```cpp
 #include "vector.h"
-#define MAX_TABLE 10'007
+#define MAX_TABLE 10007
 
 template<typename K, typename V>
 struct UnorderedMap {
@@ -33,3 +34,4 @@ struct UnorderedMap {
         return iter->second;
     }
 };
+```
