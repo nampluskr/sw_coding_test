@@ -1,11 +1,9 @@
-﻿#pragma once
+﻿## Priority Queue
 
-/* TOTO
-- 복사 생성자 / 복사 연산자 정의
-- 이터레이터 정의
-- heapify()
-- topk()
-*/
+- Max. Heap
+
+```cpp
+#pragma once
 
 template<typename T>
 struct PriorityQueue {
@@ -60,3 +58,11 @@ private:
     }
     void swap(T& a, T& b) { T temp = a; a = b; b = temp; }
 };
+```
+
+/* TOTO
+- 복사 생성자 / 복사 연산자 정의
+- 이터레이터 정의
+- heapify()
+- topk()
+*/
