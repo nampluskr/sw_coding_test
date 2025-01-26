@@ -68,7 +68,9 @@ void merge(int x, int y) {
     if (rank[x] == rank[y]) rank[x]++;
 }
 
-int getSize(int x) { return size[find(x)]; }
+int getSize(int x) { 
+    return size[find(x)];
+}
 ```
 
 ### 각 집합에 공통 값을 더하는 기능 구현 (Lazy Propagation)
@@ -93,7 +95,7 @@ init(int n) {
 // find 함수 수정: offset 값 업데이트
 int find(int x) {
     if (parent[x] == x) return x;
-    
+
     int root = find(parent[x]);
     offset[x] += offset[parent[x]];     // 경로 압축 시 offset 값 갱신 (순서 주의)
     parent[x] = root;
@@ -113,7 +115,9 @@ void merge(int x, int y) {
     if (rank[x] == rank[y]) rank[x]++;
 }
 
-int getSize(int x) { return size[find(x)]; }
+int getSize(int x) { 
+    return size[find(x)];
+}
 
 // 특정 집합의 모든 원소에 값을 더하는 함수
 void addScore(int x, int value) {
@@ -122,8 +126,7 @@ void addScore(int x, int value) {
 
 // 특정 원소의 현재 점수를 반환하는 함수
 int getScore(int x) {
-    int root = find(x);
-    return groupScore[root] + offset[x];
+    return groupScore[find(x)] + offset[x];
 }
 ```
 
@@ -153,7 +156,7 @@ int find(int x) {
     while (deleted[x] && x != parent[x]) x = parent[x];
     if (x == parent[x]) return x;
 
-    int root = find(parent[x]);    
+    int root = find(parent[x]);
     offset[x] += offset[parent[x]];
     parent[x] = root;
     return root;
@@ -161,37 +164,38 @@ int find(int x) {
 
 void merge(int x, int y) {
     if (deleted[x] || deleted[y]) return;
-    
+
     x = find(x);
     y = find(y);
     if (x == y) return;
-    
+
     if (rank[x] < rank[y]) swap(x, y);
-    
+
     parent[y] = x;
     offset[y] = groupScore[y] - groupScore[x];
     size[x] += size[y];
-    
+
     if (rank[x] == rank[y]) rank[x]++;
+}
+
+int getSize(int x) { 
+    return size[find(x)];
 }
 
 void deleteNode(int x) {
     if (deleted[x]) return;
-
-    deleted[x] = true;   
+    deleted[x] = true;
     size[find(x)]--;
 }
 
 void addScore(int x, int value) {
     if (deleted[x]) return;
-    
     groupScore[find(x)] += value;
 }
 
 int getScore(int x) {
     if (deleted[x]) return -1;
-    int root = find(x);
-    return groupScore[root] + offset[x];
+    return groupScore[find(x)] + offset[x];
 }
 
 int getSize(int x) {
