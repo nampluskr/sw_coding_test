@@ -1,14 +1,18 @@
 ﻿## Union-find
 
-### 레퍼런스 코드
+- 공통
 
 ```cpp
 #define MAX_SIZE    10000
 
 void swap(int& x, int& y) { int temp = x; x = y; y = temp; }
+```
 
-int parent[MAX_SIZE];       // 각 원소의 부모 노드를 저장하는 배열
-int rank[MAX_SIZE];         // 각 집합의 트리 높이(랭크)를 저장하는 배열
+### 레퍼런스 코드
+
+```cpp
+int parent[MAX_SIZE];       // 각 원소의 부모 노드를 저장
+int rank[MAX_SIZE];         // 각 집합의 트리 높이(랭크)
 
 init(int n) {
     for (int i = 0; i < n; i++) {
@@ -36,9 +40,9 @@ void merge(int x, int y) {
 ### 각 집합의 크기를 관리
 
 ```cpp
-int parent[MAX_SIZE];       // 각 원소의 부모 노드를 저장하는 배열
-int rank[MAX_SIZE];         // 각 집합의 트리 높이(랭크)를 저장하는 배열
-int size[MAX_SIZE];         // 각 집합의 크기를 저장하는 배열
+int parent[MAX_SIZE];       // 각 원소의 부모 노드를 저장
+int rank[MAX_SIZE];         // 각 집합의 트리 높이(랭크)
+int size[MAX_SIZE];         // 각 집합의 크기
 
 init(int n) {
     for (int i = 0; i < n; i++) {
@@ -70,9 +74,9 @@ int getSize(int x) { return size[find(x)]; }
 ### 각 집합에 공통 값을 더하는 기능 구현 (Lazy Propagation)
 
 ```cpp
-int parent[MAX_SIZE];       // 각 원소의 부모 노드를 저장하는 배열
-int rank[MAX_SIZE];         // 각 집합의 트리 높이(랭크)를 저장하는 배열
-int size[MAX_SIZE];         // 각 집합의 크기를 저장하는 배열
+int parent[MAX_SIZE];       // 각 원소의 부모 노드를 저장
+int rank[MAX_SIZE];         // 각 집합의 트리 높이(랭크)
+int size[MAX_SIZE];         // 각 집합의 크기
 int groupScore[MAX_SIZE];   // 각 집합의 공통 점수
 int offset[MAX_SIZE];       // 각 원소의 groupScore와의 offset 값
 
