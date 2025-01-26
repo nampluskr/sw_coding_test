@@ -1,4 +1,4 @@
-﻿#if 0   // 480 ms (STL)
+﻿#if 1   // 480 ms (STL)
 #include "unordered_map.h"
 #include "vector.h"
 
@@ -152,4 +152,5 @@ int check(int mId) {
 int count() {
     return villageCnt;
 }
+#endif
 #endif

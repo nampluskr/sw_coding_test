@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include <cmath>
 
 #define MAX_SAMPLES 200'000     // addSample() 함수의 호출 횟수는 20,000 이하
 #define MAX_X       4'000       // mX : x축 위치 (1 ≤ mX ≤ 4,000)
