@@ -2,6 +2,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include <cmath>
 
 #define MAX_SAMPLES 200'000     // addSample() 함수의 호출 횟수는 20,000 이하
 #define MAX_X       4'000       // mX : x축 위치 (1 ≤ mX ≤ 4,000)
@@ -20,11 +21,12 @@ struct Sample {
 
 int sampleCnt; 
 std::unordered_map<int, int> sampleMap;
-std::vector<int> sampleList[MAX_BUCKETS][MAX_BUCKETS];
 
 int K;                      // K : 최근접 이웃의 개수 (3 ≤ K ≤ 11)
 int L;                      // L : 이상치를 판별하기 위한 길이 (4 ≤ L ≤ 100)
+
 int bucketSize = BUCKET_SIZE;
+std::vector<int> buckets[MAX_BUCKETS][MAX_BUCKETS];
 
 struct Data {
 	int dist, mX, mY, sIdx;
@@ -45,7 +47,7 @@ void init(int K, int L)
 
     for (int i = 0; i < MAX_X / bucketSize; i++)
         for (int j = 0; j < MAX_Y / bucketSize; j++)
-            sampleList[i][j].clear();
+            buckets[i][j].clear();
 }
 
 void addSample(int mID, int mX, int mY, int mC)
@@ -53,7 +55,7 @@ void addSample(int mID, int mX, int mY, int mC)
     int sIdx = sampleCnt++;
     sampleMap.emplace(mID, sIdx);
     samples[sIdx] = { mX, mY, mC, ADDED };
-    sampleList[mX / bucketSize][mY / bucketSize].push_back(sIdx);
+    buckets[mX / bucketSize][mY / bucketSize].push_back(sIdx);
 }
 
 void deleteSample(int mID)
@@ -72,7 +74,7 @@ int predict(int mX, int mY)
     std::priority_queue<Data> pq;
     for (int i = sX; i <= eX; i++)
         for (int j = sY; j <= eY; j++)
-            for (int sIdx : sampleList[i][j]) {
+            for (int sIdx : buckets[i][j]) {
                 auto& sample = samples[sIdx];
                 int dist = abs(sample.mX - mX) + abs(sample.mY - mY);
                 if (sample.state == DELETED) continue;

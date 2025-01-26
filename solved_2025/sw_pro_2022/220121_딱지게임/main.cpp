@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿#ifndef _CRT_SECURE_NO_WARNINGS
+=======
+#ifndef _CRT_SECURE_NO_WARNINGS
+>>>>>>> 395401ced0861ab906b697e6a86da786d8c7265c
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
@@ -35,7 +39,11 @@ static int run(int score)
         scanf("%d", &correct_ans);
 
         if (user_ans != correct_ans)
+<<<<<<< HEAD
         score = 0;
+=======
+            score = 0;
+>>>>>>> 395401ced0861ab906b697e6a86da786d8c7265c
 
         size = (pseudo_rand() * pseudo_rand()) % ddakji_size + 1;
         r = (pseudo_rand() * pseudo_rand()) % (board_size - size + 1);
@@ -56,7 +64,10 @@ static int run(int score)
         if (user_ans != correct_ans)
             score = 0;
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 395401ced0861ab906b697e6a86da786d8c7265c
     return score;
 }
 
@@ -74,9 +85,17 @@ int main()
         clock_t t_start = clock();
         int t_score = run(score);
         int t_result = (clock() - t_start) / (CLOCKS_PER_SEC / 1000);
+<<<<<<< HEAD
         printf("#%2d %d (%3d ms)\n", t, score, t_result);
+=======
+        printf("#%2d %d (%3d ms)\n", t, t_score, t_result);
+>>>>>>> 395401ced0861ab906b697e6a86da786d8c7265c
     }
     int result = (clock() - start) / (CLOCKS_PER_SEC / 1000);
     printf(">> Result: %d ms\n", result);
     return 0;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 395401ced0861ab906b697e6a86da786d8c7265c
